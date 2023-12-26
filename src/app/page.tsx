@@ -5,8 +5,10 @@ import { useState } from 'react'
 import './style.css'
 import axios from 'axios';
 
-export default function Home() {
-  const [loginPrompt, setLoginPrompt] = useState(false)
+export default function SurveySG() {
+  const [successPrompt, setSuccessPrompt] = useState(false)
+  const [warningPrompt, setWarningPrompt] = useState(false)
+  const [promptMessage, setPromptMessage] = useState('')
 
   const [emailError, setEmailError] = useState(false)
   const [emailErrorMessage, setEmailErrorMessage] = useState('')
@@ -15,7 +17,7 @@ export default function Home() {
   const [passwordErrorMessage, setPasswordErrorMessage] = useState('')
 
   const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')  
+  const [password, setPassword] = useState('')
 
   const emailHandler = (event: any) => {
     setEmail(event?.target.value)
@@ -31,7 +33,8 @@ export default function Home() {
 
   const register = async () => {
     if (!email || !password) {
-      setLoginPrompt(true);
+      setWarningPrompt(true);
+      setPromptMessage('Please enter your GOVAA account details before clicking on register.')
     }
     const validEmail = email.includes('.gov')
     validEmail ? setEmailError(false) : setEmailError(true)
@@ -41,14 +44,22 @@ export default function Home() {
     validPassword ? setPasswordError(false) : setPasswordError(true)
     validPassword ? setPasswordErrorMessage('') : setPasswordErrorMessage('Password should contain 8 or more characters')
 
-    const res = await axios.post(`http://localhost:8000/auth`, { email: email, password: password })
+    try {
+      const res = await axios.post(`http://localhost:8000/auth`, { email: email, password: password })
+      setSuccessPrompt(true)
+      setWarningPrompt(false);
+    } catch (error: any) {
+      setWarningPrompt(true);
+      setPromptMessage(error.response.data.message)
+    }
   }
 
   const handleClose = (event?: React.SyntheticEvent | Event, reason?: string) => {
     if (reason === 'clickaway') {
       return;
     }
-    setLoginPrompt(false);
+    setSuccessPrompt(false);
+    setWarningPrompt(false);
   };
 
   return (
@@ -84,9 +95,14 @@ export default function Home() {
             Login with GOVAA
           </Button>
         </div>
-        <Snackbar open={loginPrompt} autoHideDuration={6000} onClose={handleClose}>
+        <Snackbar open={warningPrompt} autoHideDuration={6000} onClose={handleClose}>
           <Alert onClose={handleClose} severity="error" sx={{ width: '100%' }}>
-            Please enter your GOVAA account details before clicking on register.
+            {promptMessage}
+          </Alert>
+        </Snackbar>
+        <Snackbar open={successPrompt} autoHideDuration={6000} onClose={handleClose}>
+          <Alert onClose={handleClose} severity="success" sx={{ width: '100%' }}>
+            Login successfully!
           </Alert>
         </Snackbar>
       </Box>
