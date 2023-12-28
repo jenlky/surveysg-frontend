@@ -4,6 +4,7 @@ import styles from './page.module.css'
 import { useState } from 'react'
 import './style.css'
 import axios from 'axios';
+import { useRouter } from 'next/navigation';
 
 export default function SurveySG() {
   const [successPrompt, setSuccessPrompt] = useState(false)
@@ -18,6 +19,7 @@ export default function SurveySG() {
 
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const router = useRouter();
 
   const emailHandler = (event: any) => {
     setEmail(event?.target.value)
@@ -27,11 +29,7 @@ export default function SurveySG() {
     setPassword(event?.target.value)
   }
 
-  const login = () => {
-    // make API call to mocked GOVAA auth API in the server
-  }
-
-  const register = async () => {
+  const authApiCall = async () => {
     if (!email || !password) {
       setWarningPrompt(true);
       setPromptMessage('Please enter your GOVAA account details before clicking on register.')
@@ -45,12 +43,31 @@ export default function SurveySG() {
     validPassword ? setPasswordErrorMessage('') : setPasswordErrorMessage('Password should contain 8 or more characters')
 
     try {
-      const res = await axios.post(`http://localhost:8000/auth`, { email: email, password: password })
+      const res = await axios.post(`http://localhost:8000/auth`, { email, password })
       setSuccessPrompt(true)
-      setWarningPrompt(false);
+      setWarningPrompt(false)
+      return res
     } catch (error: any) {
+      console.error(error)
       setWarningPrompt(true);
       setPromptMessage(error.response.data.message)
+      return null
+    }
+  }
+
+  const register = async (e: any) => {
+    e.preventDefault()
+    const res = await authApiCall()
+    if (res?.status === 200) {
+      router.push('/register')
+    }
+  }
+
+  const login = async (e: any) => {
+    e.preventDefault()
+    const res = await authApiCall()
+    if (res?.status === 200) {
+      router.push('/profile')
     }
   }
 
