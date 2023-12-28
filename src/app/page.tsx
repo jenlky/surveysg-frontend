@@ -30,10 +30,6 @@ export default function SurveySG() {
   }
 
   const authApiCall = async () => {
-    if (!email || !password) {
-      setWarningPrompt(true);
-      setPromptMessage('Please enter your GOVAA account details before clicking on register.')
-    }
     const validEmail = email.includes('.gov')
     validEmail ? setEmailError(false) : setEmailError(true)
     validEmail ? setEmailErrorMessage('') : setEmailErrorMessage('Email should contain .gov')
