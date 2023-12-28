@@ -7,23 +7,47 @@ import { Box, Button, Checkbox, FormControl, FormControlLabel, InputLabel, MenuI
 import { TextareaAutosize as BaseTextareaAutosize } from '@mui/base/TextareaAutosize';
 import { styled } from '@mui/system';
 import agencyData from './data.json'
+import { useRouter } from "next/navigation";
 
 export default function RegisterPage() {
-  // useEffect(() => {
-  //   fetchPackageDetails().then(json => {
-  //     setData(json.data)
-  //   })
-  // }, [data?.name])
-
+  const [name, setName] = useState('')
+  const [email, setEmail] = useState('')
   const [agency, setAgency] = useState('')
+  const [jobDescription, setJobDescription] = useState('')
+  const [termsOfUse, setTermsOfUse] = useState(false)
+  const router = useRouter()
+
+  const nameHandler = (event: any) => {
+    setName(event?.target.value)
+  }
+
+  const emailHandler = (event: any) => {
+    setEmail(event?.target.value)
+  }
 
   const agencyHandler = (event: any) => {
     setAgency(event?.target.value)
   }
 
-  const register = () => {
-    // make API call to mocked GOVAA auth API in the server
-    console.log('test register')
+  const jobDescriptionHandler = (event: any) => {
+    setJobDescription(event?.target.value)
+  }
+
+  const termsOfUseHandler = (event: any) => {
+    setTermsOfUse(event?.target.value)
+  }
+
+  async function register (e: any) {
+    e.preventDefault()
+    if (!name || !email || !agency || !jobDescription || !termsOfUse) {
+      // throw error
+    }
+
+    const res = await axios.post(`http://localhost:8000/register`, { name, email, agency, jobDescription, termsOfUse })
+    console.log('test register', res)
+    if (res.status === 201) {
+      router.push('/profile')
+    }
   }
 
   const blue = {
@@ -88,8 +112,8 @@ export default function RegisterPage() {
         onSubmit={register}
         className='textfield-container'
       >
-        <TextField style={{ marginBottom: '6px' }} id="outlined-name" label="Name" variant="outlined" disabled />
-        <TextField style={{ marginBottom: '6px' }} id="outlined-email" label="Contact Email" variant="outlined" />
+        <TextField style={{ marginBottom: '6px' }} id="outlined-name" label="Name" variant="outlined" disabled onChange={nameHandler} />
+        <TextField style={{ marginBottom: '6px' }} id="outlined-email" label="Contact Email" variant="outlined" onChange={emailHandler} />
         <FormControl fullWidth>
           <InputLabel id="agency-select-label">Agency</InputLabel>
           <Select
@@ -102,13 +126,13 @@ export default function RegisterPage() {
           >
             {agencyData.map((agency) => {
               return (
-                <MenuItem value={agency}>{agency}</MenuItem>
+                <MenuItem value={agency} key={agency}>{agency}</MenuItem>
               );
             })}
           </Select>
         </FormControl>
-        <TextareaAutosize aria-label="empty textarea" placeholder="Job description" />
-        <FormControlLabel required control={<Checkbox />} label="Terms of Use" />
+        <TextareaAutosize aria-label="empty textarea" placeholder="Job Description" onChange={jobDescriptionHandler} />
+        <FormControlLabel required control={<Checkbox />} label="Terms of Use" onChange={termsOfUseHandler} />
         <Button
           variant="contained" 
           size="medium" 
