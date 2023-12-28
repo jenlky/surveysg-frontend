@@ -43,7 +43,7 @@ export default function SurveySG() {
     validPassword ? setPasswordErrorMessage('') : setPasswordErrorMessage('Password should contain 8 or more characters')
 
     try {
-      const res = await axios.post(`http://localhost:8000/auth`, { email, password })
+      const res = await axios.post(`http://localhost:8000/login`, { email, password })
       setSuccessPrompt(true)
       setWarningPrompt(false)
       return res
